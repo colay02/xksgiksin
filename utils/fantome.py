@@ -5,7 +5,7 @@ import os
 import logging
 from utils.convert import get_resource_path
 
-mod_tools_path = get_resource_path("mod-tools.exe")
+mod_tools_path = get_resource_path("backend/mod-tools.exe")
 
 def get_fantome(champion_id, skin_id):
     url = f"http://skin.khoray.top/lol-skins-developer/{champion_id}/{skin_id}.fantome"

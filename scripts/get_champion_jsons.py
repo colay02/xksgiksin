@@ -1,3 +1,4 @@
+# 用于获取最新皮肤 json
 import requests
 from tqdm import tqdm
 import json

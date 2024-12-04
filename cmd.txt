@@ -1,3 +1,0 @@
-.\mod-tools.exe mkoverlay installed dprofile --game:E:\games\WeGameApps\英雄联盟\Game --mods:TEMP
-
-.\mod-tools.exe runoverlay dprofile

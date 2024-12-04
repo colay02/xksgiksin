@@ -6,9 +6,9 @@ import winreg
 from pathlib import Path
 from tkinter import ttk
 from utils.convert import *
-from fantome import get_fantome, merge_fantome, runpatcher
-from lcusocket import LcuWebSocket
-from loloperations import LOLhelp
+from utils.fantome import get_fantome, merge_fantome, runpatcher
+from connector.lcusocket import LcuWebSocket
+from connector.loloperations import LOLhelp
 import asyncio
 
 class Window:
