@@ -49,8 +49,8 @@ class Window:
         self.skin_combo.set("(请选择英雄)")
 
         # 创建两个并排按钮
-        self.load_button = tk.Button(self.root, text="加载皮肤", width=10, command=self.load_skin)
-        self.load_button.grid(row=2, column=0, padx=10, pady=10)
+        # self.load_button = tk.Button(self.root, text="加载皮肤", width=10, command=self.load_skin)
+        # self.load_button.grid(row=2, column=0, padx=10, pady=10)
 
         self.run_button = tk.Button(self.root, text="启动", width=10, command=self.run_pathcer)
         self.run_button.grid(row=2, column=1, padx=10, pady=10)
@@ -109,46 +109,46 @@ class Window:
         # 监听事件：
         listen_thread = threading.Thread(target=interact_with_lol, args=(self.control, self, ))
         listen_thread.start()
-        
-    
-    def load_skin(self):
-        champion_name = self.champion_combo.get()
-        print(champion_name)
-        if champion_name.find("-") != -1:
-            champion_id = champion_name2id(champion_name.split()[0])
-            skin_id = skin_name2id(int(champion_id), self.skin_combo.get())
-        else:
-            champion_id = -1
-            skin_id = -1
-        if champion_id != -1 and skin_id != -1:
-            get_fantome(champion_id, skin_id)
-            self.info_label.config(text="获取皮肤文件成功。")
-            merge_fantome(self.game_path)
-            self.info_label.config(text="加载皮肤成功。")
-            self.is_load = True
-        else:
-            self.info_label.config(text="错误：请选择英雄和皮肤")
     
     def run_pathcer(self):
-        if not self.is_load:
-            self.info_label.config(text="错误：请先加载")
-            return
         if self.process is None:
-            self.process = runpatcher()
+            champion_name = self.champion_combo.get()
+            print(champion_name)
+            if champion_name.find("-") != -1:
+                champion_id = champion_name2id(champion_name.split()[0])
+                skin_id = skin_name2id(int(champion_id), self.skin_combo.get())
+            else:
+                champion_id = -1
+                skin_id = -1
+            if champion_id != -1 and skin_id != -1:
+                def thread_wrapper():
+                    self.champion_combo.config(state='disable')
+                    self.skin_combo.config(state='disable')
+                    self.get_champion_button.config(state='disable')
+                    self.run_button.config(state='disable')
+                    
+                    self.info_label.config(text='(Step 1/2): 获取皮肤文件中')
+                    get_fantome(champion_id, skin_id)
+                    self.info_label.config(text="(Step 2/2): 合并皮肤文件中")
+                    merge_fantome(self.game_path)
+                    
+                    
+                    self.process = runpatcher()
+                    
+                    self.info_label.config(text="运行中")
+                    self.run_button.config(state='normal')
+                    self.run_button.config(text="停止")
+                threading.Thread(target=thread_wrapper).start()
+            else:
+                self.info_label.config(text="错误：请选择英雄和皮肤")
             
-            self.champion_combo.config(state='disable')
-            self.skin_combo.config(state='disable')
-            self.load_button.config(state='disable')
-            
-            self.info_label.config(text="运行中。。。")
-            self.run_button.config(text="停止")
         else:
             subprocess.run('taskkill /t /f /pid {}'.format(self.process.pid), shell=True)
             self.process = None
             
             self.champion_combo.config(state='readonly')
             self.skin_combo.config(state='readonly')
-            self.load_button.config(state='normal')
+            self.get_champion_button.config(state='normal')
             
             self.info_label.config(text="已停止")
             self.run_button.config(text="启动")
@@ -190,6 +190,8 @@ def interact_with_lol(control, window: Window):
                                     uri='/lol-champ-select/v1/session',
                                     type=('Update',))
     async def onChampSelectChanged(event):
+        if window.process:
+            return
         myteam = event['data']['myTeam']
         for summoner in myteam:
             if summoner['summonerId'] == listener.current_summoner_id and listener.current_champion_id != summoner['championId'] and summoner['championId'] > 0:

@@ -3,16 +3,18 @@ import subprocess
 import shutil
 import os
 import logging
+import tempfile
 from utils.convert import get_resource_path
 
 mod_tools_path = get_resource_path("backend/mod-tools.exe")
+temp_path = get_resource_path("temp")
 
 def get_fantome(champion_id, skin_id):
     url = f"http://skin.khoray.top/lol-skins-developer/{champion_id}/{skin_id}.fantome"
     response = requests.get(url)
-    os.makedirs("temp", exist_ok=True)
+    os.makedirs(f"{temp_path}", exist_ok=True)
     if response.status_code == 200:
-        with open("temp/temp.fantome", "wb") as f:
+        with open(f"{temp_path}/temp.fantome", "wb") as f:
             f.write(response.content)
         return True
     else:
@@ -20,15 +22,15 @@ def get_fantome(champion_id, skin_id):
         return False
     
 def merge_fantome(game_path: str):
-    shutil.rmtree("temp/unzipped", ignore_errors=True)
-    os.makedirs("temp/unzipped", exist_ok=True)
-    subprocess.run(f"{mod_tools_path} import temp/temp.fantome temp/unzipped", shell=True, stdout=subprocess.DEVNULL)
+    shutil.rmtree(f"{temp_path}/unzipped", ignore_errors=True)
+    os.makedirs(f"{temp_path}/unzipped", exist_ok=True)
+    subprocess.run(f"{mod_tools_path} import {temp_path}/temp.fantome {temp_path}/unzipped", shell=True, stdout=subprocess.DEVNULL)
     print("Successfully unzipped.")
-    subprocess.run(f"{mod_tools_path} mkoverlay temp temp/profile --mods:unzipped --game:{game_path}", shell=True, stdout=subprocess.DEVNULL)
+    subprocess.run(f"{mod_tools_path} mkoverlay {temp_path} {temp_path}/profile --mods:unzipped --game:{game_path}", shell=True, stdout=subprocess.DEVNULL)
     print("Successfully merged.")
 
 def runpatcher():
-    return subprocess.Popen(f"{mod_tools_path} runoverlay temp/profile nouse", shell=True)
+    return subprocess.Popen(f"{mod_tools_path} runoverlay {temp_path}/profile nouse", shell=True)
     
     
 if __name__ == '__main__':
