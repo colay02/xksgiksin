@@ -23,30 +23,26 @@ def skin_name2id(champion_id: int, name: str):
     return -1
 
 def champion_name2id(name: str):
-    champions = champion_json['data']
-    for champion in champions.values():
+    for champion in champion_json:
         if champion['name'] == name:
             return int(champion['key'])
     return -1
 
 def champion_id2name(id: int):
-    champions = champion_json['data']
-    for champion in champions.values():
+    for champion in champion_json:
         if champion['key'] == str(id):
             return champion['name']
     return -1
 
 def champion_id2title(id: int):
-    champions = champion_json['data']
-    for champion in champions.values():
+    for champion in champion_json:
         if champion['key'] == str(id):
             return champion['title']
     return -1
 
 def get_champion_list():
     ret = []
-    champions = champion_json['data']
-    for champion in champions.values():
+    for champion in champion_json:
         ret.append(champion['name'] + " - " + champion['title'])
     return ret
 

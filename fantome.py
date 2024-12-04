@@ -8,7 +8,7 @@ from utils.convert import get_resource_path
 mod_tools_path = get_resource_path("mod-tools.exe")
 
 def get_fantome(champion_id, skin_id):
-    url = f"https://raw.githubusercontent.com/koobzaar/lol-skins-developer/refs/heads/main/{champion_id}/{skin_id}.fantome"
+    url = f"http://skin.khoray.top/lol-skins-developer/{champion_id}/{skin_id}.fantome"
     response = requests.get(url)
     os.makedirs("temp", exist_ok=True)
     if response.status_code == 200:
