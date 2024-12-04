@@ -3,8 +3,9 @@ import subprocess
 import shutil
 import os
 import logging
+from utils.convert import get_resource_path
 
-mod_tools_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mod-tools.exe")
+mod_tools_path = get_resource_path("mod-tools.exe")
 
 def get_fantome(champion_id, skin_id):
     url = f"https://raw.githubusercontent.com/koobzaar/lol-skins-developer/refs/heads/main/{champion_id}/{skin_id}.fantome"
@@ -19,7 +20,7 @@ def get_fantome(champion_id, skin_id):
         return False
     
 def merge_fantome(game_path: str):
-    shutil.rmtree("temp/unzipped")
+    shutil.rmtree("temp/unzipped", ignore_errors=True)
     os.makedirs("temp/unzipped", exist_ok=True)
     subprocess.run(f"{mod_tools_path} import temp/temp.fantome temp/unzipped", shell=True, stdout=subprocess.DEVNULL)
     print("Successfully unzipped.")
@@ -27,7 +28,7 @@ def merge_fantome(game_path: str):
     print("Successfully merged.")
 
 def runpatcher():
-    return subprocess.Popen(f"{mod_tools_path} runoverlay temp/profile nouse", shell=True, stdout=subprocess.DEVNULL)
+    return subprocess.Popen(f"{mod_tools_path} runoverlay temp/profile nouse", shell=True)
     
     
 if __name__ == '__main__':

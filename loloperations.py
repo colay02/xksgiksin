@@ -11,11 +11,16 @@ class LOLhelp:
         while True:
             try:
                 self.token, self.port = self.get_info()
+                print(self.token, self.port)
             except Exception:
                 print('retring to get lol lobby.')
                 time.sleep(1)
             finally:
-                break
+                if self.token == '':
+                    print('retring to get lol lobby.')
+                    time.sleep(1)
+                else:
+                    break
         self.url_base = f'https://riot:{self.token}@127.0.0.1:{self.port}'
         self.auto_choose = 0
         self.auto_choose_champion = 0
@@ -124,7 +129,18 @@ class LOLhelp:
         return resp.json()
     
     def get_current_summoner(self):
-        url = self.url_base + "/lol-summoner/v1/current-summoner"
-        resp = rq.get(url, verify=False)
-        return resp.json()
+        while True:
+            try:
+                url = self.url_base + "/lol-summoner/v1/current-summoner"
+                resp = rq.get(url, verify=False).json()
+                if resp.get("summonerId", None) is not None:
+                    return resp['summonerId']
+                else:
+                    print('retring to get summoner id.')
+                    time.sleep(2)
+                    continue
+            except:
+                print('retring to get summoner id.')
+                time.sleep(2)
+                pass
 

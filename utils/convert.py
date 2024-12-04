@@ -1,7 +1,19 @@
 import json
+import os
+import sys
 
-champion_json = json.load(open("champion.json", 'r', encoding='utf-8'))
-skin_json = json.load(open("champion_skin.json", 'r', encoding='utf-8'))
+def get_resource_path(name):
+    """ 获得资源的绝对路径 """
+    try:
+        # PyInstaller 创建临时文件夹时会将路径存入 sys._MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        # 不是 exe 执行环境，未找到 sys._MEIPASS，使用当前路径
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, name)
+
+champion_json = json.load(open(get_resource_path("champion.json"), 'r', encoding='utf-8'))
+skin_json = json.load(open(get_resource_path("champion_skin.json"), 'r', encoding='utf-8'))
 
 def skin_name2id(champion_id: int, name: str):
     skins = skin_json[str(champion_id)]

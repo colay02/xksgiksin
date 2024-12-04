@@ -2,6 +2,8 @@ import tkinter as tk
 import subprocess
 import os
 import threading
+import winreg
+from pathlib import Path
 from tkinter import ttk
 from utils.convert import *
 from fantome import get_fantome, merge_fantome, runpatcher
@@ -53,6 +55,10 @@ class Window:
         # 是否已经加载
         self.is_load = False
         
+        # 获取英雄联盟路径
+        self.game_path = self.getLoLPathByRegistry()
+        print(f"found gamepath: {self.game_path}")
+        
         # 启动主循环
         
         self.root.mainloop()
@@ -62,7 +68,32 @@ class Window:
             
         self.control.running = False
         
-        
+    def getLoLPathByRegistry(self) -> str:
+        """
+        从注册表获取LOL的安装路径
+
+        ** 只能获取到国服的路径, 外服不支持 **
+
+        无法获取时返回空串
+        """
+        mainKey = winreg.HKEY_CURRENT_USER
+        subKey = "SOFTWARE\Tencent\LOL"
+        valueName = "InstallPath"
+
+        try:
+            with winreg.OpenKey(mainKey, subKey) as k:
+                installPath, _ = winreg.QueryValueEx(k, valueName)
+                path = str(Path(f"{installPath}\Game").absolute()
+                        ).replace("\\", "/")
+                return f"{path[:1].upper()}{path[1:]}"
+        except FileNotFoundError:
+            print("reg path or val does not exist.")
+        except WindowsError as e:
+            print(f"occurred while reading the registry: {e}")
+        except Exception as e:
+            print("unknown error reading registry", e)
+
+        return ""        
 
     def start_auto_select(self):
         # 监听事件：
@@ -82,7 +113,7 @@ class Window:
         if champion_id != -1 and skin_id != -1:
             get_fantome(champion_id, skin_id)
             self.info_label.config(text="获取皮肤文件成功。")
-            merge_fantome(r"E:\games\WeGameApps\英雄联盟\Game")
+            merge_fantome(self.game_path)
             self.info_label.config(text="加载皮肤成功。")
             self.is_load = True
         else:
@@ -131,7 +162,7 @@ def interact_with_lol(control, window: Window):
     helper = LOLhelp()
     listener = LcuWebSocket(helper.token, helper.port)
     listener.current_champion_id = -1
-    listener.current_summoner_id = helper.get_current_summoner()['summonerId']
+    listener.current_summoner_id = helper.get_current_summoner()
     print(listener.current_summoner_id)
 
     @listener.subscribe(event='OnJsonApiEvent_lol-champ-select_v1_session',

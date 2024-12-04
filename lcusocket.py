@@ -75,7 +75,6 @@ class LcuWebSocket():
                 "You should not use OnJsonApiEvent to subscribe to all events. If you wish to debug "
                 "the program, comment out this line.")
         # 防止阻塞 connector.start()
-        print('asdflk')
         self.task = asyncio.create_task(self.runWs())
 
     async def close(self):
