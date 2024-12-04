@@ -10,12 +10,19 @@ from utils.fantome import get_fantome, merge_fantome, runpatcher
 from connector.lcusocket import LcuWebSocket
 from connector.loloperations import LOLhelp
 import asyncio
+import ctypes
 
 class Window:
     def __init__(self) -> None:
         # 创建主窗口
         self.root = tk.Tk()
         self.root.title("换肤")
+        
+        if not ctypes.windll.shell32.IsUserAnAdmin():
+            self.skin_label = tk.Label(self.root, text="请用管理员模式打开程序")
+            self.skin_label.grid(row=0, column=0, padx=10, pady=10)
+            self.root.mainloop()
+            return
 
         # 开启自动选英雄
         self.control = Control()
@@ -133,7 +140,7 @@ class Window:
             self.info_label.config(text="运行中。。。")
             self.run_button.config(text="停止")
         else:
-            os.system('taskkill /t /f /pid {}'.format(self.process.pid))
+            subprocess.run('taskkill /t /f /pid {}'.format(self.process.pid), shell=True)
             self.process = None
             
             self.champion_combo.config(state='readonly')
@@ -187,4 +194,5 @@ def interact_with_lol(control, window: Window):
 
     asyncio.run(start_c())
 
-window = Window()
+if __name__ == '__main__':
+    window = Window()
