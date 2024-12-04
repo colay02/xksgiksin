@@ -36,6 +36,9 @@ class Window:
         self.champion_combo.grid(row=0, column=1, padx=10, pady=10)
         self.champion_combo.set("(请选择)")
         self.champion_combo.bind("<<ComboboxSelected>>", self.on_champion_combo_select)
+        
+        self.get_champion_button = tk.Button(self.root, text="获取当前英雄", command=self.get_and_select_champion)
+        self.get_champion_button.grid(row=0, column=2, padx=10, pady=10)
 
         # 创建第二个下拉框
         self.skin_label = tk.Label(self.root, text="选择皮肤：")
@@ -160,13 +163,24 @@ class Window:
         else:
             self.skin_combo = ttk.Combobox(self.root, values=["(请选择英雄)"], state="readonly")
             self.skin_combo.set("(请选择英雄)")
+            
+    def get_and_select_champion(self):
+        
+        id_json = helper.get_selected_champion_id()
+        try:
+            id_json = int(id_json)
+            if id_json > 0:
+                self.champion_combo.set(champion_id2name(id_json) + " - " + champion_id2title(id_json))
+                self.on_champion_combo_select(0)
+        except Exception:
+            pass
+        
 
 class Control:
     def __init__(self) -> None:
         self.running = True
 
 def interact_with_lol(control, window: Window):
-    helper = LOLhelp()
     listener = LcuWebSocket(helper.token, helper.port)
     listener.current_champion_id = -1
     listener.current_summoner_id = helper.get_current_summoner()
@@ -195,4 +209,5 @@ def interact_with_lol(control, window: Window):
     asyncio.run(start_c())
 
 if __name__ == '__main__':
+    helper = LOLhelp()
     window = Window()
