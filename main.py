@@ -4,7 +4,7 @@ import os
 import threading
 import winreg
 from pathlib import Path
-from tkinter import ttk
+import ttkbootstrap as ttk
 from utils.convert import *
 from utils.fantome import get_fantome, merge_fantome, runpatcher
 from utils.get_champion_jsons import check_resources_file, download_all, get_lol_version, get_local_version
@@ -17,45 +17,50 @@ class Window:
     def __init__(self) -> None:
         # 创建主窗口
         self.root = tk.Tk()
+        self.main_frame = tk.Frame(self.root)
+        self.main_frame.pack(side=tk.TOP)
+        self.info_frame = tk.Frame(self.root)
+        self.info_frame.pack(side=tk.BOTTOM)
+        # ttk.Style().theme_use("vista")
         self.root.title("换肤")
         
         if not ctypes.windll.shell32.IsUserAnAdmin():
-            self.skin_label = tk.Label(self.root, text="请用管理员模式打开程序")
-            self.skin_label.grid(row=0, column=0, padx=10, pady=10)
+            self.skin_label = ttk.Label(self.root, text="请用管理员模式打开程序")
+            self.skin_label.grid(row=0, column=0, padx=10, pady=5)
             self.root.mainloop()
             return
 
 
         # 创建第一个下拉框
-        self.champion_label = tk.Label(self.root, text="选择英雄:")
-        self.champion_label.grid(row=0, column=0, padx=10, pady=10)
+        self.champion_label = ttk.Label(self.main_frame, text="选择英雄：")
+        self.champion_label.grid(row=0 ,column=0, padx=10, pady=5)
 
-        self.champion_combo = ttk.Combobox(self.root, values=["(请选择)"], state="readonly")
-        self.champion_combo.grid(row=0, column=1, padx=10, pady=10)
+        self.champion_combo = ttk.Combobox(self.main_frame, values=["(请选择)"], state="readonly")
+        self.champion_combo.grid(row=0, column=1, padx=0, pady=5)
         self.champion_combo.set("(请选择)")
         self.champion_combo.bind("<<ComboboxSelected>>", self.on_champion_combo_select)
         
-        self.get_champion_button = tk.Button(self.root, text="获取当前英雄", command=self.get_and_select_champion)
-        self.get_champion_button.grid(row=0, column=2, padx=10, pady=10)
+        self.get_champion_button = ttk.Button(self.main_frame, text="获取当前英雄", command=self.get_and_select_champion)
+        self.get_champion_button.grid(row=0, column=2, padx=10, pady=5)
 
         # 创建第二个下拉框
-        self.skin_label = tk.Label(self.root, text="选择皮肤：")
-        self.skin_label.grid(row=1, column=0, padx=10, pady=10)
+        self.skin_label = ttk.Label(self.main_frame, text="选择皮肤：")
+        self.skin_label.grid(row=1, column=0, padx=10, pady=5)
 
-        self.skin_combo = ttk.Combobox(self.root, values=["(请选择英雄)"], state="readonly")
-        self.skin_combo.grid(row=1, column=1, padx=10, pady=10)
+        self.skin_combo = ttk.Combobox(self.main_frame, values=["(请选择英雄)"], state="readonly")
+        self.skin_combo.grid(row=1, column=1, padx=0, pady=5)
         self.skin_combo.set("(请选择英雄)")
 
         # 创建两个并排按钮
         # self.load_button = tk.Button(self.root, text="加载皮肤", width=10, command=self.load_skin)
         # self.load_button.grid(row=2, column=0, padx=10, pady=10)
 
-        self.run_button = tk.Button(self.root, text="启动", width=10, command=self.run_pathcer)
-        self.run_button.grid(row=2, column=1, padx=10, pady=10)
+        self.run_button = ttk.Button(self.main_frame, text="启动", width=10, command=self.run_pathcer)
+        self.run_button.grid(row=1, column=2, padx=10, pady=5)
 
         # 显示选中的值
-        self.info_label = tk.Label(self.root, text="", justify="left")
-        self.info_label.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+        self.info_label = ttk.Label(self.info_frame, text="", anchor="w")
+        self.info_label.pack(pady=10, anchor='w', side='left')
         
         def open_event():
             # 锁定ui
@@ -107,7 +112,6 @@ class Window:
         print(f"found gamepath: {self.game_path}")
         
         # 启动主循环
-        
         self.root.mainloop()
         if self.process:
             os.system('taskkill /t /f /pid {}'.format(self.process.pid))
@@ -181,7 +185,7 @@ class Window:
             
             self.champion_combo.config(state='readonly')
             self.skin_combo.config(state='readonly')
-            self.get_champion_button.config(state='normal')
+            self.get_champion_button.config(state='normal' if self.helper.loaded else 'disabled')
             
             self.info_label.config(text="已停止")
             self.run_button.config(text="启动")

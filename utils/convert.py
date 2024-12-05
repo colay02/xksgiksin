@@ -17,8 +17,8 @@ skin_json = None
 
 def load_resource_file():
     global champion_json, skin_json
-    champion_json = json.load(open("resources/champion.json"), 'r', encoding='utf-8')
-    skin_json = json.load(open("resources/champion_skin.json"), 'r', encoding='utf-8')
+    champion_json = json.load(open("resources/champion.json", 'r', encoding='utf-8'))
+    skin_json = json.load(open("resources/champion_skin.json", 'r', encoding='utf-8'))
 
 def skin_name2id(champion_id: int, name: str):
     skins = skin_json[str(champion_id)]
