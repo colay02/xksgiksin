@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='main',
+    name='neeko_debug',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

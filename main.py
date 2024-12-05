@@ -91,7 +91,8 @@ class Window:
                 self.info_label.config(text=retry_str)
             self.helper = LOLhelp(window_handler)
             if self.helper.loaded:
-                interact_with_lol(self.control, self)
+                self.info_label.config(text='已连接到客户端')
+                threading.Thread(target=interact_with_lol, args=(self.control, self, )).start()
             else:
                 self.info_label.config(text='没有连接到英雄联盟客户端，请手动选择英雄')
                 
