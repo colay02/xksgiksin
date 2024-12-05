@@ -11,6 +11,7 @@ from utils.fantome import get_fantome, merge_fantome, runpatcher
 from utils.get_champion_jsons import check_resources_file, download_all, get_lol_version, get_local_version
 from connector.lcusocket import LcuWebSocket
 from connector.loloperations import LOLhelp
+from PIL import Image, ImageTk
 import asyncio
 import ctypes
 
@@ -113,6 +114,9 @@ class Window:
         print(f"found gamepath: {self.game_path}")
         
         # 启动主循环
+        ico = Image.open(get_resource_path('neeko.ico'))
+        photo = ImageTk.PhotoImage(ico)
+        self.root.wm_iconphoto(False, photo)
         self.root.mainloop()
         if self.process:
             os.system('taskkill /t /f /pid {}'.format(self.process.pid))

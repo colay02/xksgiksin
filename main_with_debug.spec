@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[("backend/mod-tools.exe", "backend"), ("backend/cslol-dll.dll", "backend")],
+    datas=[("backend/mod-tools.exe", "backend"), ("backend/cslol-dll.dll", "backend"), ("neeko.ico", ".")],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -35,4 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon="neeko.ico",
 )
