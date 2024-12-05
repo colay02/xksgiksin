@@ -5,6 +5,7 @@ import threading
 import winreg
 from pathlib import Path
 import ttkbootstrap as ttk
+# from tkinter import ttk
 from utils.convert import *
 from utils.fantome import get_fantome, merge_fantome, runpatcher
 from utils.get_champion_jsons import check_resources_file, download_all, get_lol_version, get_local_version
