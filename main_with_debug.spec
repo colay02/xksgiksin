@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[("backend/mod-tools.exe", "backend"), ("backend/cslol-dll.dll", "backend"), ("resources/champion.json", "resources"), ("resources/champion_skin.json", "resources")],
+    datas=[("backend/mod-tools.exe", "backend"), ("backend/cslol-dll.dll", "backend")],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

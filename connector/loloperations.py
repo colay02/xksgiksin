@@ -7,19 +7,23 @@ rq.packages.urllib3.disable_warnings()
 
 
 class LOLhelp:
-    def __init__(self):
-        while True:
+    def __init__(self, window_handler):
+        self.loaded = False
+        for try_cnt in range(5):
             try:
                 self.token, self.port = self.get_info()
                 print(self.token, self.port)
             except Exception:
-                print('retring to get lol lobby.')
+                print(f'retring to get lol lobby, cnt = {try_cnt}')
+                window_handler(f"正在连接客户端 ({try_cnt + 1}/5)")
                 time.sleep(1)
             finally:
                 if self.token == '':
-                    print('retring to get lol lobby.')
+                    print(f'retring to get lol lobby, cnt = {try_cnt}')
+                    window_handler(f"正在连接客户端 ({try_cnt + 1}/5)")
                     time.sleep(1)
                 else:
+                    self.loaded = True
                     break
         self.url_base = f'https://riot:{self.token}@127.0.0.1:{self.port}'
         self.auto_choose = 0

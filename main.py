@@ -7,6 +7,7 @@ from pathlib import Path
 from tkinter import ttk
 from utils.convert import *
 from utils.fantome import get_fantome, merge_fantome, runpatcher
+from utils.get_champion_jsons import check_resources_file, download_all, get_lol_version, get_local_version
 from connector.lcusocket import LcuWebSocket
 from connector.loloperations import LOLhelp
 import asyncio
@@ -24,15 +25,12 @@ class Window:
             self.root.mainloop()
             return
 
-        # 开启自动选英雄
-        self.control = Control()
-        self.start_auto_select()
 
         # 创建第一个下拉框
         self.champion_label = tk.Label(self.root, text="选择英雄:")
         self.champion_label.grid(row=0, column=0, padx=10, pady=10)
 
-        self.champion_combo = ttk.Combobox(self.root, values=["(请选择)"] + get_champion_list(), state="readonly")
+        self.champion_combo = ttk.Combobox(self.root, values=["(请选择)"], state="readonly")
         self.champion_combo.grid(row=0, column=1, padx=10, pady=10)
         self.champion_combo.set("(请选择)")
         self.champion_combo.bind("<<ComboboxSelected>>", self.on_champion_combo_select)
@@ -58,7 +56,46 @@ class Window:
         # 显示选中的值
         self.info_label = tk.Label(self.root, text="", justify="left")
         self.info_label.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+        
+        def open_event():
+            # 锁定ui
+            self.champion_combo.config(state='disable')
+            self.skin_combo.config(state='disable')
+            self.get_champion_button.config(state='disable')
+            self.run_button.config(state='disable')
 
+            # 检查皮肤json更新
+            if not check_resources_file() or get_local_version() != get_lol_version():
+                self.info_label.config(text='正在更新皮肤资源')
+                
+                def handler(progress_text):
+                    self.info_label.config(text=f'正在更新 ({progress_text})')
+                download_all(handler)
+                
+                self.info_label.config(text='更新完成')
+
+            load_resource_file()
+            self.champion_combo.config(values=["(请选择)"] + get_champion_list())
+            
+            # 开启自动选英雄
+            self.control = Control()
+            self.info_label.config(text='正在连接到客户端')
+            def window_handler(retry_str):
+                self.info_label.config(text=retry_str)
+            self.helper = LOLhelp(window_handler)
+            if self.helper.loaded:
+                interact_with_lol(self.control, self)
+            else:
+                self.info_label.config(text='没有连接到英雄联盟客户端，请手动选择英雄')
+                
+            # 恢复ui
+            self.champion_combo.config(state='readonly')
+            self.skin_combo.config(state='readonly')
+            self.get_champion_button.config(state='normal' if self.helper.loaded else 'disabled')
+            self.run_button.config(state='normal')
+                
+        threading.Thread(target=open_event).start()
+        
         # patcher 进程管理
         self.process = None
 
@@ -105,10 +142,6 @@ class Window:
 
         return ""        
 
-    def start_auto_select(self):
-        # 监听事件：
-        listen_thread = threading.Thread(target=interact_with_lol, args=(self.control, self, ))
-        listen_thread.start()
     
     def run_pathcer(self):
         if self.process is None:
@@ -165,8 +198,11 @@ class Window:
             self.skin_combo.set("(请选择英雄)")
             
     def get_and_select_champion(self):
+        if not self.helper.loaded:
+            self.info_label.config(text='没有连接到英雄联盟客户端，请手动选择英雄')
+            return
         
-        id_json = helper.get_selected_champion_id()
+        id_json = self.helper.get_selected_champion_id()
         try:
             id_json = int(id_json)
             if id_json > 0:
@@ -181,9 +217,9 @@ class Control:
         self.running = True
 
 def interact_with_lol(control, window: Window):
-    listener = LcuWebSocket(helper.token, helper.port)
+    listener = LcuWebSocket(window.helper.token, window.helper.port)
     listener.current_champion_id = -1
-    listener.current_summoner_id = helper.get_current_summoner()
+    listener.current_summoner_id = window.helper.get_current_summoner()
     print(listener.current_summoner_id)
 
     @listener.subscribe(event='OnJsonApiEvent_lol-champ-select_v1_session',
@@ -211,5 +247,4 @@ def interact_with_lol(control, window: Window):
     asyncio.run(start_c())
 
 if __name__ == '__main__':
-    helper = LOLhelp()
     window = Window()
