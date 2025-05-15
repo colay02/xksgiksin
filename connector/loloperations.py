@@ -15,12 +15,12 @@ class LOLhelp:
                 print(self.token, self.port)
             except Exception:
                 print(f'retring to get lol lobby, cnt = {try_cnt}')
-                window_handler(f"正在连接客户端 ({try_cnt + 1}/5)")
+                window_handler(f"正在连接客户端 (Retrying ... {try_cnt + 1}/5)")
                 time.sleep(1)
             finally:
                 if self.token == '':
                     print(f'retring to get lol lobby, cnt = {try_cnt}')
-                    window_handler(f"正在连接客户端 ({try_cnt + 1}/5)")
+                    window_handler(f"正在连接客户端 (Retrying ... {try_cnt + 1}/5)")
                     time.sleep(1)
                 else:
                     self.loaded = True

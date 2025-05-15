@@ -15,6 +15,8 @@ from PIL import Image, ImageTk
 import asyncio
 import ctypes
 
+
+
 class Window:
     def __init__(self) -> None:
         # 创建主窗口
@@ -25,13 +27,12 @@ class Window:
         self.info_frame.pack(side=tk.BOTTOM)
         # ttk.Style().theme_use("vista")
         self.root.title("换肤")
-        
+
         if not ctypes.windll.shell32.IsUserAnAdmin():
-            self.skin_label = ttk.Label(self.root, text="请用管理员模式打开程序")
+            self.skin_label = ttk.Label(self.main_frame, text="请用管理员模式打开程序")
             self.skin_label.grid(row=0, column=0, padx=10, pady=5)
             self.root.mainloop()
             return
-
 
         # 创建第一个下拉框
         self.champion_label = ttk.Label(self.main_frame, text="选择英雄：")
