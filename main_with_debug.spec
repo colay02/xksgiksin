@@ -36,4 +36,5 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon="neeko.ico",
+    uac_admin=True,
 )
