@@ -10,7 +10,7 @@ mod_tools_path = get_resource_path("backend/mod-tools.exe")
 temp_path = get_resource_path("temp")
 
 def get_fantome(champion_id, skin_id):
-    url = f"http://skin.khoray.top/lol-skins-developer/{champion_id}/{skin_id}.fantome"
+    url = f"https://gitee.com/jinjutwo/lol-skins-developer/raw/master/{champion_id}/{skin_id}.fantome"
     response = requests.get(url)
     os.makedirs(f"{temp_path}", exist_ok=True)
     if response.status_code == 200:
