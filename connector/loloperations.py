@@ -7,20 +7,23 @@ rq.packages.urllib3.disable_warnings()
 
 
 class LOLhelp:
-    def __init__(self, window_handler):
+    def __init__(self, window_handler, running_control):
         self.loaded = False
-        for try_cnt in range(5):
+        MAX_TRY_CNT = 0
+        try_cnt = 0
+        while try_cnt != MAX_TRY_CNT - 1 and running_control.running:
+            try_cnt += 1
             try:
                 self.token, self.port = self.get_info()
                 print(self.token, self.port)
             except Exception:
                 print(f'retring to get lol lobby, cnt = {try_cnt}')
-                window_handler(f"正在连接客户端 (Retrying ... {try_cnt + 1}/5)")
+                # window_handler(f"正在连接客户端 (Retrying ... {try_cnt + 1}/{MAX_TRY_CNT})")
                 time.sleep(1)
             finally:
                 if self.token == '':
                     print(f'retring to get lol lobby, cnt = {try_cnt}')
-                    window_handler(f"正在连接客户端 (Retrying ... {try_cnt + 1}/5)")
+                    # window_handler(f"正在连接客户端 (Retrying ... {try_cnt + 1}/{MAX_TRY_CNT})")
                     time.sleep(1)
                 else:
                     self.loaded = True

@@ -34,24 +34,30 @@ class Window:
             self.root.mainloop()
             return
 
+        self.search_label = ttk.Label(self.main_frame, text="筛选：")
+        self.search_label.grid(row=0, column=0, padx=10, pady=5)
+        self.search_text = ttk.Entry(self.main_frame, width=22)
+        self.search_text.bind("<KeyRelease>", self.filter_champions)
+        self.search_text.grid(row=0, column=1, padx=0, pady=5)
+
         # 创建第一个下拉框
         self.champion_label = ttk.Label(self.main_frame, text="选择英雄：")
-        self.champion_label.grid(row=0 ,column=0, padx=10, pady=5)
+        self.champion_label.grid(row=1, column=0, padx=10, pady=5)
 
-        self.champion_combo = ttk.Combobox(self.main_frame, values=["(请选择)"], state="readonly")
-        self.champion_combo.grid(row=0, column=1, padx=0, pady=5)
+        self.champion_combo = ttk.Combobox(self.main_frame, values=["(请选择)"], width=20, state="readonly")
+        self.champion_combo.grid(row=1, column=1, padx=0, pady=5)
         self.champion_combo.set("(请选择)")
         self.champion_combo.bind("<<ComboboxSelected>>", self.on_champion_combo_select)
         
         self.get_champion_button = ttk.Button(self.main_frame, text="获取当前英雄", command=self.get_and_select_champion)
-        self.get_champion_button.grid(row=0, column=2, padx=10, pady=5)
+        self.get_champion_button.grid(row=1, column=2, padx=10, pady=5)
 
         # 创建第二个下拉框
         self.skin_label = ttk.Label(self.main_frame, text="选择皮肤：")
-        self.skin_label.grid(row=1, column=0, padx=10, pady=5)
+        self.skin_label.grid(row=2, column=0, padx=10, pady=5)
 
-        self.skin_combo = ttk.Combobox(self.main_frame, values=["(请选择英雄)"], state="readonly")
-        self.skin_combo.grid(row=1, column=1, padx=0, pady=5)
+        self.skin_combo = ttk.Combobox(self.main_frame, values=["(请选择英雄)"], width=20, state="readonly")
+        self.skin_combo.grid(row=2, column=1, padx=0, pady=5)
         self.skin_combo.set("(请选择英雄)")
 
         # 创建两个并排按钮
@@ -59,12 +65,12 @@ class Window:
         # self.load_button.grid(row=2, column=0, padx=10, pady=10)
 
         self.run_button = ttk.Button(self.main_frame, text="启动", width=10, command=self.run_pathcer)
-        self.run_button.grid(row=1, column=2, padx=10, pady=5)
+        self.run_button.grid(row=2, column=2, padx=10, pady=5)
 
         # 显示选中的值
         self.info_label = ttk.Label(self.info_frame, text="", anchor="w")
         self.info_label.pack(pady=10, anchor='w', side='left')
-        
+
         def open_event():
             # 锁定ui
             self.champion_combo.config(state='disable')
@@ -84,24 +90,25 @@ class Window:
 
             load_resource_file()
             self.champion_combo.config(values=["(请选择)"] + get_champion_list())
-            
-            # 开启自动选英雄
-            self.control = Control()
-            self.info_label.config(text='正在连接到客户端')
-            def window_handler(retry_str):
-                self.info_label.config(text=retry_str)
-            self.helper = LOLhelp(window_handler)
-            if self.helper.loaded:
-                self.info_label.config(text='已连接到客户端')
-                threading.Thread(target=interact_with_lol, args=(self.control, self, )).start()
-            else:
-                self.info_label.config(text='没有连接到英雄联盟客户端，请手动选择英雄')
                 
             # 恢复ui
             self.champion_combo.config(state='readonly')
             self.skin_combo.config(state='readonly')
-            self.get_champion_button.config(state='normal' if self.helper.loaded else 'disabled')
+            self.get_champion_button.config(state='disabled')
             self.run_button.config(state='normal')
+            
+            # 开启自动选英雄
+            self.control = Control()
+            self.info_label.config(text='未连接到客户端')
+            def window_handler(retry_str):
+                self.info_label.config(text=retry_str)
+            
+            self.helper = LOLhelp(window_handler, self.control)
+            if self.helper.loaded:
+                self.info_label.config(text='已连接到客户端')
+                if not self.process:
+                    self.get_champion_button.config(state="normal")
+                threading.Thread(target=interact_with_lol, args=(self.control, self, )).start()
                 
         threading.Thread(target=open_event).start()
         
@@ -126,6 +133,14 @@ class Window:
             
         self.control.running = False
         
+    def filter_champions(self, _):
+        filter_text = self.search_text.get()
+        filtered_champions = [champion for champion in get_champion_list() if filter_text in champion]
+        self.champion_combo.config(values=["(请选择)"] + filtered_champions)
+        self.champion_combo.set("(请选择)")
+        self.on_champion_combo_select(0)
+
+
     def getLoLPathByRegistry(self) -> str:
         """
         从注册表获取LOL的安装路径
@@ -157,7 +172,6 @@ class Window:
     def run_pathcer(self):
         if self.process is None:
             champion_name = self.champion_combo.get()
-            print(champion_name)
             if champion_name.find("-") != -1:
                 champion_id = champion_name2id(champion_name.split()[0])
                 skin_id = skin_name2id(int(champion_id), self.skin_combo.get())
@@ -192,7 +206,7 @@ class Window:
             
             self.champion_combo.config(state='readonly')
             self.skin_combo.config(state='readonly')
-            self.get_champion_button.config(state='normal' if self.helper.loaded else 'disabled')
+            self.get_champion_button.config(state='normal' if hasattr(self, "helper") and self.helper.loaded else 'disabled')
             
             self.info_label.config(text="已停止")
             self.run_button.config(text="启动")
@@ -205,7 +219,7 @@ class Window:
             self.skin_combo.config(values=skin_name_list)
             self.skin_combo.set(skin_name_list[0])
         else:
-            self.skin_combo = ttk.Combobox(self.root, values=["(请选择英雄)"], state="readonly")
+            self.skin_combo.config(values=["(请选择英雄)"])
             self.skin_combo.set("(请选择英雄)")
             
     def get_and_select_champion(self):
