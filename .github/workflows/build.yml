@@ -2,9 +2,9 @@ name: Build Neeko Executables
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
@@ -32,7 +32,7 @@ jobs:
 
     - name: Build neeko_debug.exe
       run: |
-        pyinstaller main_debug.spec
+        pyinstaller main_with_debug.spec
 
     - name: Upload executables
       uses: actions/upload-artifact@v4
